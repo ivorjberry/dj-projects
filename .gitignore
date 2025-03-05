@@ -1,1 +1,3 @@
 crateenv/
+.cache/
+__pycache__/ 

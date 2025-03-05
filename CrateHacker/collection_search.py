@@ -41,8 +41,8 @@ def strict_search(results, collection, playlist_name):
     track_count = 0
     for track in results['items']:
         artists = ", ".join(item['name'] for item in track['track']['artists'])
-        #print(track['track']['name'] + artists)
-        #print("Track: " + track['track']['name'] + "; Artists: " + artists)
+        # Debug print
+        #print("Checking track: " + track['track']['name'] + "; Artists: " + artists)
         
         # Check if track is in collection
         print("Checking track: " + track['track']['name'] + "; Artists: " + artists)

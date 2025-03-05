@@ -24,7 +24,7 @@ def load_collection(file, write_json=False, write_xml=False):
                 track['artist'] = entry['@ARTIST']
             # Clean up location string to standardize
             location = entry['LOCATION']['@DIR'] + entry['LOCATION']['@FILE']
-            track['location'] = entry['LOCATION']['@VOLUME'] + clean_loc(location)
+            track['location'] = entry['LOCATION']['@VOLUME'] + clean_location(location)
             collection.append(track)
         except:
             if total_errors == 0:
@@ -53,25 +53,9 @@ def load_collection(file, write_json=False, write_xml=False):
  
     return collection
 
-def load_fresh_collection(collection_file, crate_collection_filename):
-    # Load nml collection file
-    print(f"Loading fresh collection from {collection_file}...\n")
-    with open(collection_file, "r", encoding='utf-8') as f:
-        data = f.read()
-
-    # Parse the xml data
-    collection_dict = xmltodict.parse(data)
-    entries = collection_dict['NML']['COLLECTION']['ENTRY']
-
-    
-
- 
-
-def clean_loc(location):
+def clean_location(location):
     # Remove any leading or trailing whitespace
     location = location.strip()
-    # Replace any foward slashes with backslashes
-    #location = location.replace("/", "\\")
     # Remove any colons put in by traktor
     location = location.replace(":", "")
     return location

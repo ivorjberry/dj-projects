@@ -30,7 +30,8 @@ def browse_file():
 
 def preview_playlist():
     """Display playlist title from Spotify playlist entry."""  
-    spotify_link = spotify_entry.get()  
+    spotify_link = spotify_entry.get()
+    preview_label.config(text="Checking playlist...", fg="blue")
     
     # Check if the link is provided and contains the words "spotify" and "playlist"
     if utils.verify_spotify_link(spotify_link):

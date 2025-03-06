@@ -87,10 +87,11 @@ def create_playlist():
     playlist = search.fuzzy_search(results, collection, fuzzy_ratio)
 
     # Playlist contains entire entries of found files as dict
-    utils.write_nml_playlist(playlist_name, playlist)
+    write_sucess = utils.write_traktor_playlist(playlist_name, playlist)
 
-    status_text = status_label.cget("text") + f"\nFound {tracks_found} tracks from playlist in collection with fuzzy ratio {fuzzy_ratio}.\nDone checking playlist tracks in collection."
-    status_label.config(text=status_text, fg="blue")
+    if write_sucess:
+        status_text = status_label.cget("text") + f"\nFound {len(playlist)} tracks from playlist in collection with fuzzy ratio {fuzzy_ratio}.\nDone checking playlist tracks in collection."
+        status_label.config(text=status_text, fg="blue")
 
 #############################
 # GUI build in main         #

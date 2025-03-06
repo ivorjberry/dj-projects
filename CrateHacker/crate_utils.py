@@ -61,15 +61,39 @@ def write_traktor_playlist(playlist_name, playlist):
         for entry in playlist:
             xmltodict.unparse(entry, output=f, encoding='utf-8')
     
+        # Close the collection tag and write the playlists tag
+        f.write("</COLLECTION>\n")
+        f.write("<SETS ENTRIES=\"0\"></SETS>")
+
+        # Write playlist tag and nodes
+        f.write("""<PLAYLISTS>
+                    <NODE TYPE="FOLDER" NAME="$ROOT"><SUBNODES COUNT="1">
+                    <NODE TYPE="FOLDER" NAME="2BaysCrate"><SUBNODES COUNT="1">""")
+
+        # Write playlist node and opening tag
+        f.write(f"""<NODE TYPE="PLAYLIST" NAME="{playlist_name}">
+                    <PLAYLIST ENTRIES="123" TYPE="LIST">""")
         
+        # Write entries for each track in playlist, combining volume, dir, and file of each entry. example:
+        # <ENTRY><PRIMARYKEY TYPE="TRACK" KEY="C:/:Users/:ivorj/:Music/:iTunes/:iTunes Media/:Music/:Klaus Badelt/:Pirates of the Caribbean_ The Curse of t/:15 He's a Pirate.m4a"></PRIMARYKEY>
+        # </ENTRY>
+        for entry in playlist:
+            entry_filename = entry['LOCATION']['@FILE']
+            entry_dir = entry['LOCATION']['@DIR']
+            entry_volume = entry['LOCATION']['@VOLUME']
+            entry_type = "TRACK"
+            if "stem.mp4" in entry_filename:
+                entry_type = "STEM"
+            f.write(f"""<ENTRY><PRIMARYKEY TYPE="{entry_type}" 
+                        KEY="{entry_volume + entry_dir + entry_filename}"></PRIMARYKEY>\n</ENTRY>\n""")
+
+        # Close the playlist tag and write the closing tags for the xml file
+        f.write("""</PLAYLIST>\n
+                    </NODE>\n
+                    </SUBNODES>\n</NODE>\n
+                    </SUBNODES>\n</NODE>\n
+                    </PLAYLISTS>\n
+                    </NML>""")
         
-        
-        
-        f.write("<PLAYLISTS>\n")
-        f.write(f"<NODE TYPE=\"FOLDER\" NAME=\"{playlist_name}\">\n")
-        f.write("<PLAYLIST ENTRIES=\"0\" NAME=\"Playlist\">\n")
-        f.write("<ENTRY COUNT=\"0\"/>\n")
-        f.write("</PLAYLIST>\n")
-        f.write("</NODE>\n")
-        f.write("</PLAYLISTS>\n")
-        f.write("</NML>\n")
+        print(f"Playlist {playlist_name} written to file.")
+        return True

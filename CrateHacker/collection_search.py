@@ -1,16 +1,15 @@
 from thefuzz import fuzz
 
-def fuzzy_search(results, collection, playlist_name, fuzzy_ratio):
-    # Create fuzzy file to write to
-    fuzzy_file = open("fuzzy_" + playlist_name + ".txt", "w")
+def fuzzy_search(playlist, collection, playlist_name, fuzzy_ratio):
+    results = []
     fuzzy_track_count = 0
-    for track in results['items']:
+    for track in playlist['items']:
         artists = ", ".join(item['name'] for item in track['track']['artists'])
         
         for entry in collection:
             track_title = track['track']['name'].lower()
             entry_title = entry['title'].lower()
-            if (fuzz.ratio(track_title, entry_title) > 80 or 
+            if (fuzz.ratio(track_title, entry_title) > fuzzy_ratio or 
             track_title in entry_title or
             entry_title in track_title):
                 track_artists = artists.lower()

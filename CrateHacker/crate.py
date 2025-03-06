@@ -33,7 +33,7 @@ def preview_playlist():
     spotify_link = spotify_entry.get()  
     
     # Check if the link is provided and contains the words "spotify" and "playlist"
-    if spotify_link.strip() and "spotify" in spotify_link and "playlist" in spotify_link:
+    if utils.verify_spotify_link(spotify_link):
         # Extract the playlist ID from the URL
         playlist_id = utils.get_playlist_id(spotify_link)
         playlist_name = utils.get_playlist_name(playlist_id)
@@ -49,43 +49,30 @@ def create_playlist():
     spotify_link = spotify_entry.get()  
   
     # Check if a collection file was provided  
-    if collection_file:  
-        # Verify provided file is of .nml type
-        if not collection_file.endswith(".nml"):
-            # Show a error warning the user
-            status_label.config(text="Please select a valid .nml file.", fg="red")  
-            return
-        try:
-            # Copy the file to the directory where the script is running  
-            destination = os.path.join(os.getcwd(), os.path.basename(collection_file))  
-            shutil.copy(collection_file, destination)  
-  
-            # Update the status label with the copied file path 
-            status_label.config(  
-                text=f"Collection copied to: {destination}", fg="green"  
-            )  
-        except Exception as e:  
-            # Handle any errors during the file copy  
-            status_label.config(text=f"Error copying file: {e}", fg="red")
-            return
-    else:  
-        # Update the status label if no file was provided  
-        status_label.config(text="Please select a collection file.", fg="red")
+    status_text = utils.verify_collection_file(collection_file)
+    if "Success" not in status_text:
+        status_label.config(text=status_text, fg="red")
         return
     
-    # Write last used collection file to .env
-    set_key(".env", "COLLECTION_FILE", os.path.abspath(collection_file))
+    try:
+        # Copy the file to the directory where the script is running  
+        destination = os.path.join(os.getcwd(), os.path.basename(collection_file))  
+        shutil.copy(collection_file, destination)  
+    except Exception as e:  
+        # Handle any errors during the file copy  
+        return f"Error copying file: {e}"
     
     
     # Collection now lives at destination
-    status_text = status_label.cget("text") + "\nLoading collection..."
-    status_label.config(text=status_text, fg="blue")
+    status_label.config(text="Valid collection copied to working directory.\nLoading collection...", fg="blue")
+    status_label.update_idletasks()
     collection, errors = imp.load_collection(destination)
-    status_text = status_label.cget("text") + f"\nLoaded {len(collection)} out of {len(collection) + errors} tracks from collection."
+    status_text += f"\nLoaded {len(collection)} out of {len(collection) + errors} tracks from collection."
     status_label.config(text=status_text, fg="blue")
-
+    status_label.update_idletasks()
+    
     # Check if the link is provided and contains the words "spotify" and "playlist"
-    if spotify_link.strip() and "spotify" in spotify_link and "playlist" in spotify_link:
+    if utils.verify_spotify_link(spotify_link):
         # Extract the playlist ID from the URL
         playlist_id = utils.get_playlist_id(spotify_link)
         playlist_name = utils.sp.playlist(playlist_id)['name']

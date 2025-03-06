@@ -1,37 +1,38 @@
 from thefuzz import fuzz
 
-def fuzzy_search(playlist, collection, playlist_name, fuzzy_ratio):
-    # Create fuzzy file to write to
-    fuzzy_file = open("fuzzy_" + playlist_name + ".txt", "w")
+def fuzzy_search(playlist, collection, fuzzy_ratio):
+    # XML entries as dict in collection, tracks to find as dict in playlist
+    traktor_playlist = []
     fuzzy_track_count = 0
     for track in playlist['items']:
         artists = ", ".join(item['name'] for item in track['track']['artists'])
         
         for entry in collection:
             track_title = track['track']['name'].lower()
-            entry_title = entry['title'].lower()
+            entry_title = entry['@TITLE'].lower()
             if (fuzz.ratio(track_title, entry_title) > fuzzy_ratio or 
             track_title in entry_title or
             entry_title in track_title):
                 track_artists = artists.lower()
                 try:
-                    entry_artists = entry['artist'].lower()
+                    entry_artists = entry['@ARTIST'].lower()
                 except:
                     entry_artists = "Unknown"
 
                 if (fuzz.ratio(track_artists, entry_artists) > fuzzy_ratio or
                 track_artists in entry_artists or
                 entry_artists in track_artists):
-                    # Debug print
-                    #print(f"Track: {track['track']['name']}; Artists: {artists} is in collection.")
-                    #print(f"Location: {entry['location']}")
-                    fuzzy_file.write(f"{entry['location']}\n")
+                    # Copy entire entry to new dict
+                    print(entry)
+                    traktor_playlist.append(entry)
                     fuzzy_track_count += 1
                 
 
     print("Found " + str(fuzzy_track_count) + " tracks from playlist in collection.")
     print("FUZZY: Done checking playlist tracks in collection.")
-    return fuzzy_track_count
+
+    # Playlist holds entire entries of found files
+    return traktor_playlist
 
 def strict_search(results, collection, playlist_name):
     # Create strict file to write to

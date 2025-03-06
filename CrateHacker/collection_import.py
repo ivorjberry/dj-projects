@@ -76,7 +76,9 @@ def load_collection(file, write_json=False, write_xml=False):
     
     collection_dict = xmltodict.parse(data)
     entries = collection_dict['NML']['COLLECTION']['ENTRY']
-
+    
+    return entries
+"""
     # Create a dictionary for each track in the collection
     collection = []
     total_errors = 0
@@ -117,7 +119,7 @@ def load_collection(file, write_json=False, write_xml=False):
         write_xml(collection)    
  
     return collection, total_errors
-
+"""
 def clean_location(location):
     # Remove any leading or trailing whitespace
     location = location.strip()

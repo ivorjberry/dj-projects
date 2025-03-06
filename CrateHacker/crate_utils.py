@@ -1,5 +1,6 @@
 import spotipy
 import os
+import xmltodict
 import shutil
 from dotenv import load_dotenv, set_key
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -48,3 +49,27 @@ def verify_collection_file(collection_file) -> str:
     # Write last used collection file to .env
     set_key(".env", "COLLECTION_FILE", os.path.abspath(collection_file))
     return "Success: Valid collection file provided."
+
+def write_traktor_playlist(playlist_name, playlist):
+    # Write the playlist to new .nml file, as xml
+    with open(f"{playlist_name}.nml", "w") as f:
+        f.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n")
+        f.write("<NML VERSION=\"20\"><HEAD COMPANY=\"www.native-instruments.com\" PROGRAM=\"Traktor Pro 4\"></HEAD>\n")
+        f.write(f"<COLLECTION ENTRIES=\" {len(playlist)} \">\n")
+
+        # Loop through entries, and write as xml
+        for entry in playlist:
+            xmltodict.unparse(entry, output=f, encoding='utf-8')
+    
+        
+        
+        
+        
+        f.write("<PLAYLISTS>\n")
+        f.write(f"<NODE TYPE=\"FOLDER\" NAME=\"{playlist_name}\">\n")
+        f.write("<PLAYLIST ENTRIES=\"0\" NAME=\"Playlist\">\n")
+        f.write("<ENTRY COUNT=\"0\"/>\n")
+        f.write("</PLAYLIST>\n")
+        f.write("</NODE>\n")
+        f.write("</PLAYLISTS>\n")
+        f.write("</NML>\n")

@@ -32,6 +32,7 @@ def preview_playlist():
     """Display playlist title from Spotify playlist entry."""  
     spotify_link = spotify_entry.get()
     preview_label.config(text="Checking playlist...", fg="blue")
+    preview_label.update_idletasks()
     
     # Check if the link is provided and contains the words "spotify" and "playlist"
     if utils.verify_spotify_link(spotify_link):
@@ -55,6 +56,10 @@ def create_playlist():
         status_label.config(text=status_text, fg="red")
         return
     
+    if not utils.verify_spotify_link(spotify_link):
+        status_label.config(text="Error: Please enter a valid Spotify playlist link.", fg="red")
+        return
+    
     try:
         # Copy the file to the directory where the script is running  
         destination = os.path.join(os.getcwd(), os.path.basename(collection_file))  
@@ -67,20 +72,22 @@ def create_playlist():
     # Collection now lives at destination
     status_label.config(text="Valid collection copied to working directory.\nLoading collection...", fg="blue")
     status_label.update_idletasks()
-    collection, errors = imp.load_collection(destination)
-    status_text += f"\nLoaded {len(collection)} out of {len(collection) + errors} tracks from collection."
+    collection = imp.load_collection(destination)
+    status_text += f"\nLoaded {len(collection)} tracks from collection."
     status_label.config(text=status_text, fg="blue")
     status_label.update_idletasks()
     
-    # Check if the link is provided and contains the words "spotify" and "playlist"
-    if utils.verify_spotify_link(spotify_link):
-        # Extract the playlist ID from the URL
-        playlist_id = utils.get_playlist_id(spotify_link)
-        playlist_name = utils.sp.playlist(playlist_id)['name']
-        results = utils.get_playlist_info(playlist_id)
+    
+    # Spotify link already validated. Extract the playlist ID from the URL
+    playlist_id = utils.get_playlist_id(spotify_link)
+    playlist_name = utils.sp.playlist(playlist_id)['name']
+    results = utils.get_playlist_info(playlist_id)
         
     fuzzy_ratio = fuzzy_slider.get()  
-    tracks_found = search.fuzzy_search(results, collection, playlist_name, fuzzy_ratio)
+    playlist = search.fuzzy_search(results, collection, fuzzy_ratio)
+
+    # Playlist contains entire entries of found files as dict
+    utils.write_nml_playlist(playlist_name, playlist)
 
     status_text = status_label.cget("text") + f"\nFound {tracks_found} tracks from playlist in collection with fuzzy ratio {fuzzy_ratio}.\nDone checking playlist tracks in collection."
     status_label.config(text=status_text, fg="blue")
